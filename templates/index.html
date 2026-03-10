@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="te" translate="no">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="google" content="notranslate"/>
+<meta http-equiv="Content-Language" content="te"/>
+<title>Voice-Based Government Scheme Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0A0F1A; --bg2:#0E1520; --bg3:#141C2E;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#E8EDF5; --muted:#6B7A95;
+  --saffron:#FF7043; --green:#2ECC71; --gold:#F9A825; --blue:#42A5F5;
+  --card:rgba(255,255,255,0.04);
+  --font-en:'Plus Jakarta Sans',sans-serif;
+  --font-te:'Noto Sans Telugu',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-te);background:var(--bg);color:var(--text);font-size:14px}
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 15% 15%,rgba(255,112,67,.12) 0%,transparent 70%),
+  radial-gradient(ellipse 60% 70% at 85% 85%,rgba(46,204,113,.08) 0%,transparent 65%),
+  linear-gradient(170deg,#0A0F1A 0%,#0E1520 100%);}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:50px 50px;}
+
+/* LAYOUT */
+.app{position:relative;z-index:1;display:grid;grid-template-columns:280px 1fr;height:100vh;}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;background:rgba(10,15,26,0.85);border-right:1px solid var(--border);backdrop-filter:blur(24px);overflow:hidden;}
+.sb-header{padding:22px 20px 16px;background:linear-gradient(135deg,rgba(255,112,67,0.12),rgba(46,204,113,0.06));border-bottom:1px solid var(--border);flex-shrink:0;}
+.sb-logo{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sb-logo-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#FF7043,#FF5722);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.sb-logo-text .t1{font-family:var(--font-en);font-size:15px;font-weight:700}
+.sb-logo-text .t2{font-size:11px;color:var(--muted);font-family:var(--font-en)}
+.sb-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-family:var(--font-en);color:var(--green);background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.25);border-radius:20px;padding:3px 10px;}
+.sb-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.sb-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sb-stat{text-align:center;padding:8px 4px;background:var(--card);border-radius:10px;border:1px solid var(--border);}
+.sb-stat .n{font-family:var(--font-en);font-size:18px;font-weight:700;color:var(--gold)}
+.sb-stat .l{font-size:9.5px;color:var(--muted);font-family:var(--font-en);margin-top:2px}
+.sb-body{flex:1;overflow-y:auto;padding:10px 0}
+.sb-body::-webkit-scrollbar{width:3px}
+.sb-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:10px}
+.sb-section-label{font-family:var(--font-en);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:12px 20px 6px;}
+.sb-scheme{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:10px;cursor:pointer;transition:all .2s;border:none;background:transparent;color:var(--text);width:calc(100% - 16px);text-align:left;}
+.sb-scheme:hover{background:var(--card);transform:translateX(3px)}
+.sb-scheme .si{font-size:17px;flex-shrink:0}
+.sb-scheme .sc{flex:1;overflow:hidden}
+.sb-scheme .sn{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-scheme .sa{font-size:10px;color:var(--gold);font-family:var(--font-en)}
+.sb-scheme .stag{font-size:9px;font-family:var(--font-en);padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;opacity:.75;}
+
+/* CHAT MAIN */
+.chat-main{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.topbar{padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(10,15,26,0.6);backdrop-filter:blur(20px);flex-shrink:0;}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#FF7043,#F9A825);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.topbar-name{font-weight:600;font-size:15px}
+.topbar-status{font-size:11px;color:var(--green);font-family:var(--font-en)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+
+/* TTS TOGGLE */
+.tts-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:rgba(255,255,255,.06);color:var(--muted);cursor:pointer;font-family:var(--font-en);font-size:11.5px;font-weight:600;transition:all .25s;}
+.tts-btn:hover{border-color:rgba(46,204,113,.4)}
+.tts-btn.on{background:rgba(46,204,113,.15);color:var(--green);border-color:rgba(46,204,113,.4);box-shadow:0 0 14px rgba(46,204,113,.2);}
+.tts-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .25s;flex-shrink:0;}
+.tts-btn.on .tts-dot{background:var(--green);animation:pulse 1.5s infinite}
+
+/* MODE TOGGLE */
+.mode-toggle{display:flex;background:rgba(255,255,255,0.07);border-radius:22px;padding:3px;gap:2px;}
+.mode-btn{padding:5px 14px;border-radius:20px;border:none;cursor:pointer;font-family:var(--font-en);font-size:11.5px;font-weight:500;transition:all .25s;color:var(--muted);background:transparent;}
+.mode-btn.active{background:linear-gradient(135deg,#FF7043,#FF5722);color:white;box-shadow:0 2px 10px rgba(255,112,67,.5);}
+
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+.msgs::-webkit-scrollbar{width:4px}
+.msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:10px}
+.welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px;}
+.wl-emoji{font-size:56px;margin-bottom:18px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.wl-title{font-family:var(--font-en);font-size:26px;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,#FF7043,#F9A825);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wl-sub{font-size:15px;color:var(--muted);margin-bottom:28px;max-width:480px;line-height:1.9}
+.wl-chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:520px}
+.wl-chip{padding:9px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-family:var(--font-te);font-size:13px;transition:all .22s;color:var(--text);}
+.wl-chip:hover{background:rgba(255,112,67,.15);border-color:rgba(255,112,67,.4);transform:translateY(-2px)}
+
+/* Message rows */
+.msg-row{display:flex;gap:10px;animation:slideUp .3s ease}
+.msg-row.user{flex-direction:row-reverse}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.msg-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;background:linear-gradient(135deg,#FF7043,#F9A825);}
+.msg-row.user .msg-av{background:linear-gradient(135deg,#7C3AED,#4F46E5)}
+.msg-bubble{max-width:74%;padding:12px 16px;border-radius:16px;font-size:13.5px;line-height:1.75;}
+.msg-row.bot .msg-bubble{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.msg-row.user .msg-bubble{background:linear-gradient(135deg,#FF7043,#FF5722);color:white;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(255,112,67,.35);}
+.msg-bubble strong{color:var(--gold)}
+.msg-row.user .msg-bubble strong{color:rgba(255,255,255,.95)}
+.msg-time{font-size:9.5px;color:var(--muted);margin-top:4px;font-family:var(--font-en)}
+.msg-row.bot .msg-time{text-align:left}.msg-row.user .msg-time{text-align:right}
+
+/* Typing */
+.typing-dots{display:flex;align-items:center;gap:4px;padding:13px 16px}
+.td{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.4s infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+
+/* ══ SPEAK BUTTON ══ */
+.speak-row{display:flex;align-items:center;gap:8px;margin-top:9px;}
+.speak-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:18px;
+  border:1.5px solid rgba(46,204,113,.3);
+  background:rgba(46,204,113,.1);
+  color:var(--green);cursor:pointer;
+  font-size:12px;font-family:var(--font-en);font-weight:700;
+  transition:all .22s;
+}
+.speak-btn:hover{background:rgba(46,204,113,.22);border-color:rgba(46,204,113,.55);transform:scale(1.04)}
+.speak-btn.speaking{
+  background:rgba(46,204,113,.25);border-color:var(--green);
+  animation:speakGlow 1.1s infinite;
+}
+@keyframes speakGlow{0%,100%{box-shadow:0 0 4px rgba(46,204,113,.3)}50%{box-shadow:0 0 16px rgba(46,204,113,.7)}}
+
+/* Wave animation bars */
+.wbars{display:inline-flex;align-items:center;gap:2px}
+.wbars b{display:block;width:2.5px;border-radius:2px;background:var(--green);}
+.wbars b:nth-child(1){height:5px;animation:wb .6s infinite ease-in-out}
+.wbars b:nth-child(2){height:9px;animation:wb .6s .1s infinite ease-in-out}
+.wbars b:nth-child(3){height:14px;animation:wb .6s .2s infinite ease-in-out}
+.wbars b:nth-child(4){height:9px;animation:wb .6s .3s infinite ease-in-out}
+.wbars b:nth-child(5){height:5px;animation:wb .6s .4s infinite ease-in-out}
+@keyframes wb{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.3)}}
+
+/* TTS status bar at bottom */
+.tts-bar{
+  display:none;align-items:center;gap:10px;
+  padding:8px 20px;
+  background:rgba(46,204,113,.1);
+  border-top:1px solid rgba(46,204,113,.2);
+  font-size:12px;color:var(--green);
+  font-family:var(--font-en);flex-shrink:0;
+}
+.tts-bar.show{display:flex}
+.tts-wave{display:flex;gap:2px;align-items:center}
+.tts-wave b{display:block;width:3px;border-radius:2px;background:var(--green);}
+.tts-wave b:nth-child(1){height:8px;animation:wb .7s infinite}
+.tts-wave b:nth-child(2){height:13px;animation:wb .7s .1s infinite}
+.tts-wave b:nth-child(3){height:18px;animation:wb .7s .2s infinite}
+.tts-wave b:nth-child(4){height:13px;animation:wb .7s .3s infinite}
+.tts-wave b:nth-child(5){height:8px;animation:wb .7s .4s infinite}
+.tts-stop-btn{margin-left:auto;padding:3px 12px;border-radius:10px;border:1px solid rgba(46,204,113,.3);background:transparent;color:var(--green);cursor:pointer;font-size:11px;font-family:var(--font-en);}
+.tts-stop-btn:hover{background:rgba(46,204,113,.15)}
+
+/* Scheme cards */
+.cat-section{margin-top:12px}
+.cat-label{font-family:var(--font-en);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;}
+.scheme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:14px}
+.scheme-card{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all .22s;}
+.scheme-card:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px)}
+.sc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sc-icon{font-size:22px}.sc-name{font-size:12.5px;font-weight:700}
+.sc-summary{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.sc-amount{font-family:var(--font-en);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;display:inline-block;background:rgba(249,168,37,.12);color:var(--gold);border:1px solid rgba(249,168,37,.2);}
+
+/* Detail card */
+.detail-card{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.dc-header{padding:16px 18px;display:flex;align-items:flex-start;gap:12px;}
+.dc-icon{font-size:34px;flex-shrink:0;margin-top:2px}
+.dc-title{font-size:16px;font-weight:700;margin-bottom:3px}
+.dc-cat{font-family:var(--font-en);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;opacity:.7;margin-bottom:5px}
+.dc-amount{font-family:var(--font-en);font-size:13px;font-weight:700;color:var(--gold);}
+.dc-body{padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+.dc-section-label{font-family:var(--font-en);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;opacity:.8;}
+.dc-tags{display:flex;flex-wrap:wrap;gap:5px}
+.dc-tag{background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11.5px;}
+.dc-desc{font-size:12.5px;line-height:1.75;color:rgba(232,237,245,.85)}
+.dc-link{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-en);font-size:12px;color:var(--gold);text-decoration:none;border-bottom:1px dashed rgba(249,168,37,.4);}
+
+/* Suggestions */
+.sug-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.sug{padding:6px 13px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;font-family:var(--font-te);font-size:12px;transition:all .2s;}
+.sug:hover{background:rgba(255,112,67,.18);border-color:rgba(255,112,67,.45)}
+
+/* Input zone */
+.input-zone{padding:12px 24px 14px;border-top:1px solid var(--border);background:rgba(10,15,26,.7);backdrop-filter:blur(20px);flex-shrink:0;}
+.input-row{display:flex;align-items:flex-end;gap:8px;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:22px;padding:9px 9px 9px 18px;transition:border-color .2s;}
+.input-row:focus-within{border-color:rgba(255,112,67,.45)}
+#chatInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--font-te);font-size:14px;resize:none;max-height:110px;line-height:1.6;}
+#chatInput::placeholder{color:var(--muted)}
+.btn-voice,.btn-send{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .22s;font-size:16px;flex-shrink:0;}
+.btn-voice{background:rgba(255,255,255,.09);color:var(--text)}
+.btn-voice:hover{background:rgba(46,204,113,.22);color:var(--green)}
+.btn-voice.recording{background:rgba(46,204,113,.3);color:var(--green);animation:rPulse 1.2s infinite;}
+@keyframes rPulse{0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,.4)}50%{box-shadow:0 0 0 8px rgba(46,204,113,0)}}
+.btn-send{background:linear-gradient(135deg,#FF7043,#FF5722);color:white;box-shadow:0 3px 12px rgba(255,112,67,.4);}
+.btn-send:hover{transform:scale(1.09)}.btn-send:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.hint-text{text-align:center;margin-top:6px;font-size:10.5px;color:var(--muted);font-family:var(--font-en);}
+
+/* Voice overlay */
+.voice-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,15,26,.94);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+.voice-overlay.active{display:flex}
+.voice-orb{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(46,204,113,.35),rgba(46,204,113,.08));display:flex;align-items:center;justify-content:center;font-size:44px;border:2px solid rgba(46,204,113,.35);position:relative;}
+.voice-orb.active{animation:orbPulse 1.2s infinite}
+.voice-orb::before,.voice-orb::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(46,204,113,.18);animation:ripple 2s linear infinite;}
+.voice-orb::before{width:170px;height:170px;animation-delay:.3s}
+.voice-orb::after{width:210px;height:210px;animation-delay:.8s}
+@keyframes orbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes ripple{0%{opacity:.8;transform:scale(.9)}100%{opacity:0;transform:scale(1.4)}}
+.voice-status{font-size:18px;font-weight:600}
+.voice-transcript{font-size:14px;color:var(--muted);text-align:center;max-width:380px;min-height:22px}
+.voice-cancel{padding:9px 28px;border-radius:22px;border:1.5px solid rgba(255,255,255,.18);background:transparent;color:var(--text);cursor:pointer;font-family:var(--font-en);font-size:13px;}
+
+/* Language Toggle in Sidebar */
+.lang-toggle{
+  display:flex;gap:4px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:rgba(255,255,255,0.02);
+}
+.lang-btn{
+  flex:1;padding:6px 4px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;
+  font-family:var(--font-en);font-size:11px;font-weight:600;
+  transition:all .2s;text-align:center;
+}
+.lang-btn.active{
+  background:linear-gradient(135deg,#FF7043,#FF5722);
+  color:white;border-color:transparent;
+  box-shadow:0 2px 8px rgba(255,112,67,.4);
+}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,0.07);color:var(--text)}
+
+@media(max-width:768px){
+  .app{grid-template-columns:1fr}.sidebar{display:none}
+  .topbar{padding:12px 16px}.msgs{padding:14px 16px}.input-zone{padding:10px 16px 12px}
+}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div><div class="bg-grid"></div>
+
+<div class="app">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">🏛️</div>
+      <div class="sb-logo-text">
+        <div class="t1">Scheme Assistant</div>
+        <div class="t2">Andhra Pradesh Govt</div>
+      </div>
+    </div>
+    <div class="sb-badge">● 23 పథకాలు Online</div>
+  </div>
+  <div class="sb-stats">
+    <div class="sb-stat"><div class="n">23</div><div class="l">Schemes</div></div>
+    <div class="sb-stat"><div class="n">82</div><div class="l">Docs</div></div>
+    <div class="sb-stat"><div class="n">AP</div><div class="l">State</div></div>
+  </div>
+  <!-- Telugu Only — no language toggle needed -->
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="langTe" style="cursor:default;">🇮🇳 తెలుగు మాత్రమే</button>
+  </div>
+  <div class="sb-body" id="sbBody"></div>
+</aside>
+
+<!-- CHAT MAIN -->
+<main class="chat-main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-avatar">🤖</div>
+      <div>
+        <div class="topbar-name">పథకాల సహాయకుడు</div>
+        <div class="topbar-status">● Online · 23 AP Schemes Ready</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <!-- 🔊 TTS TOGGLE BUTTON -->
+      <button class="tts-btn" id="ttsBtn" onclick="toggleTTS()">
+        <span class="tts-dot" id="ttsDot"></span>
+        <span id="ttsLabel">🔇 Voice Off</span>
+      </button>
+      <!-- Input Mode -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="txtBtn" onclick="setMode('text')">⌨️ Type</button>
+        <button class="mode-btn" id="voiceBtn2" onclick="setMode('voice')">🎙️ Voice In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages area -->
+  <div class="msgs" id="msgs">
+    <div class="welcome-screen" id="welcome">
+      <div class="wl-emoji">🏛️</div>
+      <div class="wl-title">నమస్కారం! 🙏</div>
+      <div class="wl-sub">
+        AP ప్రభుత్వం యొక్క <strong style="color:var(--gold)">23 పథకాల</strong> గురించి తెలుగులో అడగండి.<br/>
+        <span style="color:var(--green)">🔊 Voice Off</span> button click చేస్తే Bot reply automatically <strong>Voice లో వినిపిస్తుంది!</strong>
+      </div>
+      <!-- RUN INSTRUCTIONS NOTICE -->
+      <div id="runNotice" style="
+        display:none;margin:12px 0;padding:12px 20px;
+        background:rgba(255,112,67,.12);border:1px solid rgba(255,112,67,.35);
+        border-radius:12px;font-family:var(--font-en);font-size:13px;
+        color:#FF7043;text-align:center;max-width:420px;line-height:1.8;
+      ">
+        ⚠️ <strong>File directly open చేస్తున్నారు!</strong><br/>
+        VS Code Terminal లో <code style="background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;">python app.py</code> run చేసి<br/>
+        Browser లో <code style="background:rgba(0,0,0,.3);padding:2px 8px;border-radius:4px;">http://localhost:5000</code> తెరవండి
+      </div>
+      <div class="wl-chips">
+        <div class="wl-chip" onclick="send('PM Kisan గురించి చెప్పు')">🌾 PM Kisan</div>
+        <div class="wl-chip" onclick="send('రైతు భరోసా గురించి చెప్పు')">🚜 రైతు భరోసా</div>
+        <div class="wl-chip" onclick="send('ఆరోగ్యశ్రీ వివరాలు')">🏥 ఆరోగ్యశ్రీ</div>
+        <div class="wl-chip" onclick="send('విద్యా దీవెన అర్హత')">📚 విద్యా దీవెన</div>
+        <div class="wl-chip" onclick="send('అన్ని పథకాలు చూపించు')">📋 అన్ని 23 పథకాలు</div>
+        <div class="wl-chip" onclick="send('అమ్మ వోడి పథకం')">👩‍👦 అమ్మ వోడి</div>
+        <div class="wl-chip" onclick="send('వాహన మిత్ర గురించి చెప్పు')">🚗 వాహన మిత్ర</div>
+        <div class="wl-chip" onclick="send('పెన్షన్ కానుక పథకం')">👴 పెన్షన్ కానుక</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TTS status bar (visible while speaking) -->
+  <div class="tts-bar" id="ttsBar">
+    <div class="tts-wave"><b></b><b></b><b></b><b></b><b></b></div>
+    <span id="ttsBarTxt">🔊 మాట్లాడుతున్నాను...</span>
+    <button class="tts-stop-btn" onclick="stopSpeaking()">⏹ ఆపు</button>
+  </div>
+
+  <!-- Input zone -->
+  <div class="input-zone">
+    <div class="input-row">
+      <textarea id="chatInput"
+        placeholder="పథకం పేరు టైప్ చేయండి... (e.g. PM Kisan గురించి చెప్పు)"
+        rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <div style="display:flex;gap:5px;align-items:flex-end">
+        <button class="btn-voice" id="voiceMicBtn" onclick="startVoice()" title="Voice Input 🎙️">🎙️</button>
+        <button class="btn-send" id="sendBtn" onclick="send()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="hint-text" id="hintText">
+      💡 పై <strong>🔇 Voice Off</strong> button click చేయండి — Bot reply automatically Telugu Voice లో వినిపిస్తుంది
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- Voice Input Overlay -->
+<div class="voice-overlay" id="voiceOverlay">
+  <div class="voice-orb" id="voiceOrb">🎙️</div>
+  <div class="voice-status" id="voiceSt">వినడం మొదలైంది...</div>
+  <div class="voice-transcript" id="voiceTr">మీరు చెప్పండి</div>
+  <button class="voice-cancel" onclick="stopVoice()">✕ రద్దు చేయి</button>
+</div>
+
+<script>
+// ══════════════════════════════
+//  STATE
+// ══════════════════════════════
+let firstMsg      = true;
+let recognition   = null;
+let isRec         = false;
+// ══════════════════════════════════════════════════
+//  LANGUAGE — Telugu only. English input auto-works.
+// ══════════════════════════════════════════════════
+let currentLang = 'te';  // always Telugu
+
+// English keyword → Telugu keyword map for auto-translation of queries
+const EN_TO_TE_KEYWORDS = {
+  // scheme names
+  "rythu bharosa":"రైతు భరోసా","farmer":"రైతు","kisan":"కిసాన్","crop insurance":"పంట బీమా",
+  "vidya deevena":"విద్యా దీవెన","education":"విద్య","fee":"ఫీజు","scholarship":"స్కాలర్‌షిప్",
+  "vasati deevena":"వసతి దీవెన","hostel":"హాస్టల్",
+  "amma vodi":"అమ్మ వోడి","mother":"తల్లి","school":"పాఠశాల",
+  "aarogyasri":"ఆరోగ్యశ్రీ","health":"ఆరోగ్యం","hospital":"ఆసుపత్రి","medical":"వైద్యం",
+  "arogya asara":"ఆరోగ్య ఆసర","surgery":"శస్త్రచికిత్స",
+  "kanti velugu":"కాంతి వెలుగు","eye":"కళ్ళు","vision":"చూపు",
+  "pelli kanuka":"పెళ్ళి కానుక","marriage":"వివాహం","wedding":"పెళ్ళి",
+  "pension":"పెన్షన్","old age":"వృద్ధాప్యం","widow":"వితంతువు",
+  "vahana mitra":"వాహన మిత్ర","auto driver":"ఆటో డ్రైవర్","taxi":"టాక్సీ",
+  "yuva nestham":"యువ నేస్తం","unemployment":"నిరుద్యోగం","youth":"యువత",
+  "law nestham":"లా నేస్తం","lawyer":"న్యాయవాది","legal":"న్యాయ",
+  "cheyutha":"చేయూత","women":"మహిళలు",
+  "kapu nestham":"కాపు నేస్తం",
+  "pasupu kumkuma":"పాసుపు కుంకుమ","self help":"స్వయం సహాయ",
+  "fishermen":"మత్స్యకారులు","fishing":"చేపల వేట",
+  "weaver":"చేనేత","handloom":"చేనేత",
+  "anna canteen":"అన్నా క్యాంటీన్","food":"భోజనం","meal":"భోజనం",
+  "house":"ఇల్లు","housing":"గృహ నిర్మాణం","home":"ఇల్లు",
+  "solar":"సోలార్","electricity":"విద్యుత్",
+  // intent words
+  "tell me about":"గురించి చెప్పు","what is":"ఏమిటి","how to apply":"ఎలా దరఖాస్తు చేయాలి",
+  "eligibility":"అర్హత","benefits":"ప్రయోజనాలు","documents":"పత్రాలు",
+  "all schemes":"అన్ని పథకాలు","show all":"అన్నీ చూపించు","list":"జాబితా",
+  "about":"గురించి","details":"వివరాలు","info":"సమాచారం","help":"సహాయం"
+};
+
+// Detect if input is mostly English
+function isMostlyEnglish(text) {
+  const teluguChars = (text.match(/[\u0C00-\u0C7F]/g) || []).length;
+  const alphaChars  = (text.match(/[a-zA-Z]/g) || []).length;
+  return alphaChars > teluguChars && alphaChars > 2;
+}
+
+// Convert English query to Telugu for scheme matching
+function autoTranslateToTelugu(text) {
+  if (!isMostlyEnglish(text)) return text; // already Telugu, return as-is
+  let out = text.toLowerCase();
+  // Replace known English phrases/words with Telugu equivalents
+  for (const [en, te] of Object.entries(EN_TO_TE_KEYWORDS)) {
+    out = out.replace(new RegExp(en, 'gi'), te);
+  }
+  return out;
+}
+
+function setLang(lang) {
+  // no-op — Telugu only, kept for compatibility
+}
+
+// ══════════════════════════════
+
+// ══════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════
+const SIDEBAR_SCHEMES = [
+  {n:"PM Kisan / రైతు భరోసా",i:"🚜",a:"₹13,500/yr",c:"#FF9800",q:"రైతు భరోసా గురించి చెప్పు"},
+  {n:"విద్యా దీవెన",i:"📚",a:"100% ఫీజు",c:"#4CAF50",q:"విద్యా దీవెన గురించి చెప్పు"},
+  {n:"వసతి దీవెన",i:"🏠",a:"₹10k-20k/yr",c:"#2196F3",q:"వసతి దీవెన గురించి చెప్పు"},
+  {n:"అమ్మ వోడి",i:"👩‍👦",a:"₹15,000/yr",c:"#E91E63",q:"అమ్మ వోడి పథకం"},
+  {n:"పంట బీమా",i:"🌾",a:"ఉచిత బీమా",c:"#8BC34A",q:"పంట బీమా గురించి చెప్పు"},
+  {n:"మత్స్యకార భరోసా",i:"🐟",a:"₹10,000/yr",c:"#00BCD4",q:"మత్స్యకార భరోసా పథకం"},
+  {n:"ఆరోగ్యశ్రీ",i:"🏥",a:"₹2.5L/yr",c:"#F44336",q:"ఆరోగ్యశ్రీ వివరాలు"},
+  {n:"ఆరోగ్య ఆసర",i:"💊",a:"₹5k/month",c:"#9C27B0",q:"ఆరోగ్య ఆసర పథకం"},
+  {n:"కాంతి వెలుగు",i:"👁️",a:"ఉచిత Eye Care",c:"#00BCD4",q:"కాంతి వెలుగు పథకం"},
+  {n:"పెళ్ళి కానుక",i:"💒",a:"₹1 లక్ష",c:"#FF4081",q:"పెళ్ళి కానుక పథకం"},
+  {n:"YSR చేయూత",i:"🧕",a:"₹75,000/4yr",c:"#E91E63",q:"YSR చేయూత పథకం"},
+  {n:"కాపు నేస్తం",i:"👩",a:"₹75,000/5yr",c:"#FF5722",q:"కాపు నేస్తం పథకం"},
+  {n:"పాసుపు కుంకుమ",i:"📱",a:"₹10k+Phone",c:"#9C27B0",q:"పాసుపు కుంకుమ పథకం"},
+  {n:"వాహన మిత్ర",i:"🚗",a:"₹10,000/yr",c:"#607D8B",q:"వాహన మిత్ర గురించి చెప్పు"},
+  {n:"పెన్షన్ కానుక",i:"👴",a:"₹2,250/mth",c:"#795548",q:"పెన్షన్ కానుక పథకం"},
+  {n:"నేతన్న నేస్తం",i:"🧵",a:"₹24,000/yr",c:"#FF9800",q:"నేతన్న నేస్తం పథకం"},
+  {n:"యువ నేస్తం",i:"🎓",a:"₹2k/month",c:"#2196F3",q:"యువ నేస్తం పథకం"},
+  {n:"Law నేస్తం",i:"⚖️",a:"₹5k/month",c:"#607D8B",q:"Law నేస్తం పథకం"},
+  {n:"ఆదరణ-2",i:"🔧",a:"90% subsidy",c:"#795548",q:"ఆదరణ 2 పథకం"},
+  {n:"ప్రీ మెట్రిక్",i:"🏫",a:"Scholarship",c:"#3F51B5",q:"ప్రీ మెట్రిక్ స్కాలర్‌షిప్"},
+  {n:"అన్నా క్యాంటీన్",i:"🍱",a:"₹5/meal",c:"#FF5722",q:"అన్నా క్యాంటీన్ పథకం"},
+  {n:"గృహ నిర్మాణం",i:"🏗️",a:"ఉచిత ఇల్లు",c:"#FF9800",q:"YSR గృహ నిర్మాణం"},
+  {n:"సూర్య శక్తి",i:"☀️",a:"83% subsidy",c:"#FFC107",q:"సూర్య శక్తి పథకం"},
+];
+
+window.addEventListener('load', () => {
+  // Detect if opened as file:// instead of http://localhost
+  if (window.location.protocol === 'file:') {
+    const notice = document.getElementById('runNotice');
+    if (notice) notice.style.display = 'block';
+  }
+
+  // Build sidebar
+  const el = document.getElementById('sbBody');
+  let html = '<div class="sb-section-label">త్వరిత పథకాలు</div>';
+  SIDEBAR_SCHEMES.forEach(s => {
+    html += `<button class="sb-scheme" onclick="send('${s.q}')">
+      <span class="si">${s.i}</span>
+      <span class="sc"><span class="sn">${s.n}</span><span class="sa">${s.a}</span></span>
+      <span class="stag" style="background:${s.c}22;color:${s.c}">AP</span>
+    </button>`;
+  });
+  el.innerHTML = html;
+});
+
+// ══════════════════════════════
+//  LANGUAGE TOGGLE
+// ══════════════════════════════
+// ══════════════════════════════
+//  SEND / RECEIVE
+// ══════════════════════════════
+async function send(txt) {
+  const input = document.getElementById('chatInput');
+  const rawMsg = (txt || input.value).trim();
+  if (!rawMsg) return;
+
+  // ── Auto-translate English → Telugu for scheme matching ──
+  const msg = autoTranslateToTelugu(rawMsg);
+
+  if (firstMsg) {
+    document.getElementById('welcome').style.display = 'none';
+    firstMsg = false;
+  }
+
+  input.value = '';
+  input.style.height = 'auto';
+  appendUser(rawMsg);   // show original user text in chat
+  appendTyping();
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
+    const res  = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message: msg})   // send translated query
+    });
+    const data = await res.json();
+    removeTyping();
+    appendBot(data);
+
+    // ══ AUTO-SPEAK when TTS is ON ══
+    if (ttsEnabled) {
+      const txt = buildSpeakText(data);
+      if (txt) {
+        speakText(txt, null);  // always Telugu TTS
+      }
+    }
+
+  } catch(e) {
+    removeTyping();
+    appendBot({type:'error', text:'❌ Server తో connection లేదు. దయచేసి మళ్ళీ try చేయండి.'});
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+// ══════════════════════════════════════════════════════════
+//  BUILD CLEAN SPEAK TEXT — strips English, keeps Telugu only
+// ══════════════════════════════════════════════════════════
+function stripEnglishSentences(text) {
+  if (!text) return '';
+  // Split into sentences and keep only those with majority Telugu chars
+  return text
+    .split(/[.।!?]+/)
+    .filter(s => {
+      const teluguChars = (s.match(/[\u0C00-\u0C7F]/g) || []).length;
+      const totalChars  = s.replace(/\s/g,'').length;
+      // Keep sentence if >30% Telugu characters
+      return totalChars === 0 || teluguChars / totalChars > 0.30;
+    })
+    .join('. ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function buildSpeakText(data) {
+  if (!data) return '';
+  if (data.type === 'scheme_detail')
+    return data.tts_text || data.scheme_name + ' పథకం వివరాలు.';
+  if (data.type === 'schemes_list')
+    return 'ఆంధ్రప్రదేశ్ ప్రభుత్వం యొక్క ఇరవై మూడు పథకాల జాబితా చూపించబడింది.';
+  if (data.type === 'welcome')
+    return 'నమస్కారం. నేను ఆంధ్రప్రదేశ్ పథకాల సహాయకుడిని. ఏ పథకం గురించి అయినా అడగవచ్చు.';
+  return stripEnglishSentences(
+    (data.text || '').replace(/\*\*/g,'').replace(/\*/g,'').replace(/\n/g,' ').trim()
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  TTS ENGINE — gTTS via Flask /api/tts  (v3 clean)
+// ══════════════════════════════════════════════════════════
+let ttsAudio       = null;
+let ttsQueue       = [];
+let ttsEnabled     = false;
+let activeSpeakBtn = null;
+let ttsSafe        = null;   // per-chunk safety timer
+
+// Split Telugu text into short sentence chunks (≤90 chars each)
+function chunkText(text) {
+  if (!text || !text.trim()) return [];
+  const parts = [];
+  // Split on sentence-ending punctuation
+  const sentences = text.trim().split(/(?<=[.।!?।])\s+/);
+  let buf = '';
+  for (const s of sentences) {
+    if (!s.trim()) continue;
+    if ((buf ? buf + ' ' + s : s).length <= 90) {
+      buf = buf ? buf + ' ' + s : s;
+    } else {
+      if (buf) parts.push(buf.trim());
+      // sentence itself too long? split by spaces
+      if (s.length > 90) {
+        const words = s.split(' ');
+        buf = '';
+        for (const w of words) {
+          if ((buf ? buf + ' ' + w : w).length > 90) {
+            if (buf) parts.push(buf.trim());
+            buf = w;
+          } else {
+            buf = buf ? buf + ' ' + w : w;
+          }
+        }
+      } else {
+        buf = s;
+      }
+    }
+  }
+  if (buf.trim()) parts.push(buf.trim());
+  return parts.filter(p => p.length >= 2);
+}
+
+function gttsUrl(text, forceLang) {
+  const lang = forceLang || 'te';  // always Telugu TTS
+  return `/api/tts?q=${encodeURIComponent(text)}&lang=${lang}`;
+}
+
+function playNextChunk() {
+  if (ttsSafe) { clearTimeout(ttsSafe); ttsSafe = null; }
+
+  if (ttsQueue.length === 0) {
+    hideTtsBar();
+    setBtnSpeaking(activeSpeakBtn, false);
+    activeSpeakBtn = null;
+    ttsAudio = null;
+    return;
+  }
+
+  const chunk = ttsQueue.shift();
+  if (!chunk || chunk.trim().length < 2) { playNextChunk(); return; }
+
+  showTtsBar(chunk.substring(0, 45) + (chunk.length > 45 ? '...' : ''));
+
+  // ✅ Create Audio with src — do NOT call .load() — breaks onended in Chrome
+  const audio = new Audio(gttsUrl(chunk));
+  ttsAudio = audio;
+
+  audio.onended = () => {
+    if (ttsSafe) { clearTimeout(ttsSafe); ttsSafe = null; }
+    ttsAudio = null;
+    setTimeout(playNextChunk, 80);
+  };
+
+  audio.onerror = () => {
+    if (ttsSafe) { clearTimeout(ttsSafe); ttsSafe = null; }
+    ttsAudio = null;
+    setTimeout(playNextChunk, 100);
+  };
+
+  const p = audio.play();
+  if (p !== undefined) {
+    p.then(() => {
+      // Safety: if onended never fires, move on after (chars * 180ms) or min 5s
+      const ms = Math.max(8000, chunk.length * 300);
+      ttsSafe = setTimeout(() => {
+        try { audio.pause(); } catch(e) {}
+        ttsAudio = null;
+        playNextChunk();
+      }, ms);
+    }).catch(() => {
+      ttsAudio = null;
+      setTimeout(playNextChunk, 100);
+    });
+  }
+}
+
+function speakText(text, btnEl) {
+  if (!text || !text.trim()) return;
+
+  // Toggle off if same button clicked while speaking
+  if (activeSpeakBtn === btnEl && btnEl !== null) {
+    stopSpeaking();
+    return;
+  }
+
+  stopSpeaking();
+  activeSpeakBtn = btnEl;
+
+  ttsQueue = chunkText(text);
+  if (ttsQueue.length === 0) return;
+
+  setBtnSpeaking(btnEl, true);
+  showTtsBar('మాట్లాడుతున్నాను...');
+  playNextChunk();
+}
+
+function stopSpeaking() {
+  if (ttsSafe) { clearTimeout(ttsSafe); ttsSafe = null; }
+  if (ttsAudio) { try { ttsAudio.pause(); ttsAudio.src=''; } catch(e){} ttsAudio = null; }
+  ttsQueue = [];
+  hideTtsBar();
+  setBtnSpeaking(activeSpeakBtn, false);
+  activeSpeakBtn = null;
+}
+
+function setBtnSpeaking(btn, on) {
+  if (!btn) return;
+  if (on) {
+    btn.classList.add('speaking');
+    btn.innerHTML = `🔊 వింటున్నారు... <span class="wbars"><b></b><b></b><b></b><b></b><b></b></span>`;
+  } else {
+    btn.classList.remove('speaking');
+    btn.innerHTML = '🔊 వినండి';
+  }
+}
+
+function showTtsBar(preview) {
+  document.getElementById('ttsBarTxt').textContent = '🔊 ' + preview;
+  document.getElementById('ttsBar').classList.add('show');
+}
+function hideTtsBar() {
+  document.getElementById('ttsBar').classList.remove('show');
+}
+
+// Toggle auto-speak on/off
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const btn  = document.getElementById('ttsBtn');
+  const lbl  = document.getElementById('ttsLabel');
+  const hint = document.getElementById('hintText');
+  if (ttsEnabled) {
+    btn.classList.add('on');
+    lbl.innerHTML = '🔊 Voice On';
+    hint.innerHTML = '✅ <strong>Voice On</strong> — Bot reply automatically Telugu Voice లో వినిపిస్తుంది';
+  } else {
+    btn.classList.remove('on');
+    lbl.innerHTML = '🔇 Voice Off';
+    hint.innerHTML = '💡 పై <strong>🔇 Voice Off</strong> button click చేయండి — Telugu Voice లో వినడానికి';
+    stopSpeaking();
+  }
+}
+
+// ══════════════════════════════
+//  RENDER
+// ══════════════════════════════
+function now() { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function md(t) { return esc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'); }
+
+function appendUser(msg) {
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `<div class="msg-av">👤</div>
+    <div><div class="msg-bubble">${esc(msg)}</div><div class="msg-time">${now()}</div></div>`;
+  document.getElementById('msgs').appendChild(row);
+  scrollBottom();
+}
+
+function appendBot(data) {
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  let inner = '';
+
+  if (data.type === 'scheme_detail') {
+    const s = data.data;
+    const hbg   = (data.color||'#FF7043') + '18';
+    const hbord = (data.color||'#FF7043') + '30';
+    inner = `<div class="msg-bubble">
+      <div class="detail-card" style="border-color:${hbord}">
+        <div class="dc-header" style="background:${hbg}">
+          <div class="dc-icon">${esc(data.icon||'📋')}</div>
+          <div style="flex:1">
+            <div class="dc-cat">${esc(data.category||'')}</div>
+            <div class="dc-title">${esc(s.name)}</div>
+            <div class="dc-amount">${esc(s.amount)}</div>
+          </div>
+        </div>
+        <div class="dc-body">
+          <div class="dc-section">
+            <div class="dc-section-label" style="color:${data.color||'#FF7043'}">📋 వివరణ</div>
+            <div class="dc-desc">${esc(s.description)}</div>
+          </div>
+          ${s.eligibility?`<div class="dc-section">
+            <div class="dc-section-label" style="color:${data.color||'#FF7043'}">✅ అర్హత</div>
+            <div class="dc-tags">${s.eligibility.map(e=>`<span class="dc-tag">• ${esc(e)}</span>`).join('')}</div>
+          </div>`:''}
+          ${s.benefits?`<div class="dc-section">
+            <div class="dc-section-label" style="color:${data.color||'#FF7043'}">💰 ప్రయోజనాలు</div>
+            <div class="dc-tags">${s.benefits.map(b=>`<span class="dc-tag">✓ ${esc(b)}</span>`).join('')}</div>
+          </div>`:''}
+          ${s.apply?`<div class="dc-section">
+            <div class="dc-section-label" style="color:${data.color||'#FF7043'}">📝 దరఖాస్తు</div>
+            <div class="dc-tags">${s.apply.map((a,i)=>`<span class="dc-tag">${i+1}. ${esc(a)}</span>`).join('')}</div>
+          </div>`:''}
+          ${s.documents?`<div class="dc-section">
+            <div class="dc-section-label" style="color:${data.color||'#FF7043'}">📎 పత్రాలు అవసరం</div>
+            <div class="dc-tags">${s.documents.map(d=>`<span class="dc-tag">📄 ${esc(d)}</span>`).join('')}</div>
+          </div>`:''}
+          ${s.website?`<div class="dc-section">
+            <div class="dc-section-label" style="color:${data.color||'#FF7043'}">🌐 Website</div>
+            <a class="dc-link" href="https://${esc(s.website)}" target="_blank">${esc(s.website)} ↗</a>
+          </div>`:''}
+        </div>
+      </div>
+    </div>`;
+
+  } else if (data.type === 'schemes_list' && data.categories) {
+    let cats = '';
+    for (const [cat, schemes] of Object.entries(data.categories)) {
+      cats += `<div class="cat-section">
+        <div class="cat-label">📁 ${esc(cat)} (${schemes.length})</div>
+        <div class="scheme-grid">
+          ${schemes.map(s=>`
+            <div class="scheme-card" onclick="send('${esc(s.name)} గురించి చెప్పు')" style="border-color:${s.color}25">
+              <div class="sc-head"><span class="sc-icon">${esc(s.icon)}</span><span class="sc-name">${esc(s.name)}</span></div>
+              <div class="sc-summary">${esc(s.summary)}</div>
+              <span class="sc-amount" style="background:${s.color}15;color:${s.color}">${esc(s.amount)}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    }
+    inner = `<div class="msg-bubble">${md(data.text)}<div style="margin-top:12px">${cats}</div></div>`;
+
+  } else {
+    inner = `<div class="msg-bubble">${md(data.text||'')}</div>`;
+  }
+
+  if (data.suggestions) {
+    inner += `<div class="sug-row">${data.suggestions.map(s=>`<button class="sug" onclick="send('${esc(s)}')">${esc(s)}</button>`).join('')}</div>`;
+  }
+
+  // ══ 🔊 SPEAK BUTTON — on EVERY bot message ══
+  // Store speak text in a data attribute to avoid inline JSON escaping issues
+  const speakTextVal = buildSpeakText(data);
+  const btnId = 'sb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+  inner += `<div class="speak-row">
+    <button class="speak-btn" id="${btnId}" onclick="handleSpeakClick('${btnId}')">
+      🔊 వినండి
+    </button>
+    <span style="font-size:10px;color:var(--muted);font-family:var(--font-en)">
+      — click చేయండి Telugu voice లో వినడానికి
+    </span>
+  </div>`;
+
+  row.innerHTML = `<div class="msg-av">🤖</div>
+    <div style="flex:1;max-width:84%">${inner}<div class="msg-time">${now()}</div></div>`;
+
+  document.getElementById('msgs').appendChild(row);
+
+  // Store speak text on the button element after render
+  const btn = document.getElementById(btnId);
+  if (btn) btn._speakText = speakTextVal;
+
+  scrollBottom();
+}
+
+// Called when 🔊 button is clicked
+function handleSpeakClick(btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const txt = btn._speakText || '';
+  speakText(txt, btn);
+}
+
+function appendTyping() {
+  const row = document.createElement('div');
+  row.className = 'msg-row bot'; row.id = 'typing';
+  row.innerHTML = `<div class="msg-av">🤖</div>
+    <div class="msg-bubble" style="background:rgba(255,255,255,.05);border:1px solid var(--border)">
+      <div class="typing-dots"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+    </div>`;
+  document.getElementById('msgs').appendChild(row);
+  scrollBottom();
+}
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+function scrollBottom() {
+  const m = document.getElementById('msgs');
+  setTimeout(() => m.scrollTo({top: m.scrollHeight, behavior:'smooth'}), 60);
+}
+
+// ══════════════════════════════
+//  VOICE INPUT
+// ══════════════════════════════
+function setMode(m) {
+  document.getElementById('txtBtn').classList.toggle('active', m==='text');
+  document.getElementById('voiceBtn2').classList.toggle('active', m==='voice');
+  if (m === 'voice') {
+    startVoice();
+  }
+  // Do NOT call stopVoice on text mode switch — it breaks recognition flow
+}
+
+function startVoice() {
+  stopSpeaking(); // stop TTS before mic opens
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    alert('Voice Input కోసం Google Chrome browser వాడండి.\nMicrosoft Edge కూడా పని చేస్తుంది.');
+    document.getElementById('txtBtn').classList.add('active');
+    document.getElementById('voiceBtn2').classList.remove('active');
+    return;
+  }
+  if (isRec) { stopVoice(); return; }
+
+  recognition = new SR();
+  recognition.lang            = 'te-IN';   // always Telugu for voice input
+  recognition.continuous      = true;       // keep listening until user stops
+  recognition.interimResults  = true;
+  recognition.maxAlternatives = 1;
+
+  const ov  = document.getElementById('voiceOverlay');
+  const orb = document.getElementById('voiceOrb');
+  const st  = document.getElementById('voiceSt');
+  const tr  = document.getElementById('voiceTr');
+
+  ov.classList.add('active');
+  orb.classList.add('active');
+  isRec = true;
+  document.getElementById('voiceMicBtn').classList.add('recording');
+  st.textContent = '🎙️ వినడం మొదలైంది...';
+  tr.textContent = 'మీరు మాట్లాడండి...';
+
+  let finalTranscript  = '';
+  let silenceTimer     = null;
+
+  function onHeard() {
+    // Auto-submit 2 seconds after user stops talking
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      const heard = finalTranscript.trim();
+      if (heard && heard.length > 1) {
+        st.textContent = '✅ పంపిస్తున్నాను...';
+        tr.textContent = heard;
+        stopVoice();
+        document.getElementById('txtBtn').classList.add('active');
+        document.getElementById('voiceBtn2').classList.remove('active');
+        document.getElementById('chatInput').value = heard;
+        setTimeout(() => send(), 200);
+      }
+    }, 1800);
+  }
+
+  recognition.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        finalTranscript += e.results[i][0].transcript;
+        onHeard();
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    tr.textContent = (finalTranscript + interim).trim() || 'మీరు మాట్లాడండి...';
+    if (finalTranscript.trim()) st.textContent = '✅ వినపడింది! మాట్లాడుతూ ఉండండి...';
+  };
+
+  recognition.onend = () => {
+    // Chrome sometimes stops — restart if still in voice mode and nothing heard yet
+    if (isRec && !finalTranscript.trim()) {
+      try { recognition.start(); } catch(e) {}
+      return;
+    }
+    const heard = finalTranscript.trim();
+    stopVoice();
+    document.getElementById('txtBtn').classList.add('active');
+    document.getElementById('voiceBtn2').classList.remove('active');
+    if (heard && heard.length > 1) {
+      document.getElementById('chatInput').value = heard;
+      setTimeout(() => send(), 200);
+    }
+  };
+
+  recognition.onerror = e => {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    if (e.error === 'no-speech') {
+      // Chrome stops on silence — restart automatically
+      if (isRec) {
+        try { recognition.start(); } catch(err) {}
+        st.textContent = '🎙️ వినడం మొదలైంది...';
+      }
+      return;
+    }
+    let msg = '❌ ' + e.error;
+    if (e.error === 'not-allowed')    msg = '❌ Mic permission లేదు!\nBrowser address bar లో 🔒 → Microphone → Allow చేయండి.';
+    if (e.error === 'network')        msg = '❌ Network error.';
+    if (e.error === 'audio-capture')  msg = '❌ Microphone దొరకలేదు.';
+    st.textContent = msg;
+    setTimeout(stopVoice, 3000);
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  if (recognition) {
+    try { recognition.abort(); } catch(e) {}  // abort() is cleaner than stop()
+    recognition = null;
+  }
+  isRec = false;
+  document.getElementById('voiceOverlay').classList.remove('active');
+  document.getElementById('voiceOrb').classList.remove('active');
+  document.getElementById('voiceMicBtn').classList.remove('recording');
+}
+</script>
+</body>
+</html>
