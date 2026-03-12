@@ -13,7 +13,6 @@
 - 📋 **Category-wise Scheme Listing**
 - 🔍 **Smart Keyword Search** — State-context aware (AP vs TS)
 - 🌙 **Dark Premium UI**
-- 💯 **100% Accuracy** — 30/30 test cases passed
 
 ---
 
